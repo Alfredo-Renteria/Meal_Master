@@ -33,3 +33,13 @@ CREATE TABLE RecipeIngredients (
     FOREIGN KEY(recipeID) REFERENCES Recipes(recipeID),
     FOREIGN KEY(ingredientID) REFERENCES Ingredients(ingredientID)
 );
+
+CREATE TABLE History (
+    historyID SERIAL,
+    monID INT REFERENCES Recipes(recipeID),
+    tueID INT REFERENCES Recipes(recipeID),
+    wedID INT REFERENCES Recipes(recipeID),
+    thuID INT REFERENCES Recipes(recipeID),
+    friID INT REFERENCES Recipes(recipeID),
+    PRIMARY KEY(historyID)
+);

@@ -28,12 +28,12 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION addIngredient(ingredient_name_ VARCHAR)
 RETURNS VOID AS $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM Ingredients WHERE ingredientName = ingredient_name_) THEN
-    INSERT INTO Ingredients (ingredientName)
-    VALUES (ingredient_name_);
-  END IF;
-END;
+  BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Ingredients WHERE ingredientName = ingredient_name_) THEN
+      INSERT INTO Ingredients (ingredientName)
+      VALUES (ingredient_name_);
+    END IF;
+  END;
 $$ LANGUAGE plpgsql;
 
 -- Retrieves ingredientID from Ingredients table given ingredientName
@@ -55,12 +55,12 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION addRecipe(recipe_name_ VARCHAR, mealtype_id_ INT, instructions_ TEXT)
 RETURNS VOID AS $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM Recipes WHERE recipeName = recipe_name_) THEN
-    INSERT INTO Recipes (recipeName, mealTypeID, instructions)
-    VALUES (recipe_name_, mealtype_id_, instructions_);
-  END IF;
-END;
+  BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Recipes WHERE recipeName = recipe_name_) THEN
+      INSERT INTO Recipes (recipeName, mealTypeID, instructions)
+      VALUES (recipe_name_, mealtype_id_, instructions_);
+    END IF;
+  END;
 $$ LANGUAGE plpgsql;
 
 -- Retrieves recipeID from Recipes table given recipeName
@@ -83,10 +83,30 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION addRecipeIngredients(recipe_id_ INT, ingredient_id_ INT, total_qty_ NUMERIC, qty_type_ VARCHAR)
 RETURNS VOID AS $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM RecipeIngredients WHERE ingredientID = ingredient_id_) THEN
-    INSERT INTO RecipeIngredients (recipeID, ingredientID, totalQty, QtyType)
+  BEGIN
+    INSERT INTO RecipeIngredients (recipeID, ingredientID, TotalQty, QtyType)
     VALUES (recipe_id_, ingredient_id_, total_qty_, qty_type_);
-  END IF;
-END;
+  END;
+$$ LANGUAGE plpgsql;
+
+-- Returns table of recipes that are made of the mealTypeID
+
+CREATE OR REPLACE FUNCTION getRecipesByMealType(mealtype_id_ INT)
+RETURNS TABLE (recipeID INT, recipeName VARCHAR) AS $$
+  BEGIN
+  RETURN QUERY SELECT r.recipeID, r.recipeName
+               FROM Recipes r
+               WHERE mealTypeID = getRecipesByMealType.mealtype_id_;
+  END;
+$$ LANGUAGE plpgsql;
+
+-- Return table of the last 3; if any, recent schedules
+
+CREATE OR REPLACE FUNCTION getRecentSchedules()
+RETURNS TABLE (historyID INT, monID INT, tueID INT, wedID INT, thurID INT, friID INT) AS $$
+  BEGIN
+  RETURN QUERY SELECT h.historyID, h.monID, h.tueID, h.wedID, h.thuID, h.friID
+               FROM History h
+               ORDER BY h.historyID DESC LIMIT 3;
+  END;
 $$ LANGUAGE plpgsql;
